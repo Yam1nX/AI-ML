@@ -1,26 +1,21 @@
 //1. Horner's Rule (সহজ)
-
-
-#include <iostream>
-using namespace std;
-
 int main() {
     int n;
     cout << "Degree of polynomial: ";
     cin >> n;
-
+    if (n < 0 || n > 99) {
+        cout << "Invalid degree!\n";
+        return 0;
+    }
     double a[100];
     cout << "Coefficients (highest to lowest):\n";
     for (int i = 0; i <= n; i++) cin >> a[i];
-
     double x;
     cout << "Value of x: ";
     cin >> x;
-
     double result = a[0];
     for (int i = 1; i <= n; i++)
         result = result * x + a[i];
-
     cout << "f(" << x << ") = " << result << endl;
     return 0;
 }
@@ -35,12 +30,6 @@ int main() {
 
 
 //2. Banker's Rounding (সহজ)
-#include <iostream>
-#include <cmath>
-#include <iomanip>
-#include <cfenv>
-using namespace std;
-
 int main() {
     long double x;
     int n;
@@ -56,14 +45,10 @@ int main() {
         cout << "Rounded value: 0\n";
         return 0;
     }
-
     fesetround(FE_TONEAREST);   // banker's rounding(round to nearest even)
-
     int p = floor(log10(fabsl(x)));          // exponent
     long double factor = pow(10.0L, n - 1 - p);
-
     long double ans = nearbyintl(x * factor) / factor;
-
     cout << "Rounded value: " << setprecision(n) << ans << endl;
     return 0;
 }
@@ -146,7 +131,57 @@ int main() {
 // Output:
 // Approximate root = 1.32470703125
 
+// 3. Bisection Method easy
+#include <iostream>
+using namespace std;
+double f(double x) {
+    return x*x*x - x - 1;
+}
+int main() {
+    double a, b, e;
+    cout << "Enter a, b: ";
+    cin >> a >> b;
+    cout << "Enter tolerance: ";
+    cin >> e;
+    if (e <= 0) {
+        cout << "Invalid tolerance!\n";
+        return 0;
+    }
+    if (a > b) {
+        double t = a;
+        a = b;
+        b = t;
+    }
+    if (f(a) == 0) {
+        cout << "Root = " << a << endl;
+        return 0;
+    }
+    if (f(b) == 0) {
+        cout << "Root = " << b << endl;
+        return 0;
+    }
 
+    if (f(a) * f(b) > 0) {
+        cout << "No root is bracketed in this interval.\n";
+        return 0;
+    }
+    int i = 0;
+    while ((b - a) > e && i < 1000) {
+        double mid = (a + b) / 2;
+        if (f(mid) == 0) {
+            a = b = mid;
+            break;
+        }
+        if (f(a) * f(mid) < 0)
+            b = mid;
+        else
+            a = mid;
+        i++;
+    }
+    cout << "Approximate root = " << (a + b) / 2 << endl;
+    if ((b - a) > e)
+        cout << "Tolerance not reached within 1000 iterations.\n";
+}
 
 // 4. Newton-Raphson Method
 double f(double x) {
@@ -191,7 +226,6 @@ int main() {
 }
 // 4. Newton–Raphson Method
 // Example: x³ − x − 1 = 0, initial guess 1.5
-
 // Input:
 // 1.5
 // 0.0001
