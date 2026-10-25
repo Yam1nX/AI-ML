@@ -1,3 +1,336 @@
+// 1. Horner's Rule (Lec-3, Page 4)
+#include <iostream>
+#include <vector>
+using namespace std;
+int main() {
+    int n;
+    cout << "Enter degree of polynomial: ";
+    cin >> n;
+
+    vector<double> coeffs(n + 1);
+    cout << "Enter coefficients from highest to lowest degree:\n";
+    for (int i = 0; i <= n; i++) {
+        cout << "a[" << n - i << "] = ";
+        cin >> coeffs[i];
+    }
+
+    double x;
+    cout << "Enter value of x: ";
+    cin >> x;
+
+    double result = coeffs[0];
+    for (int i = 1; i <= n; i++) {
+        result = result * x + coeffs[i];
+    }
+
+    cout << "\nPolynomial value at x = " << x << " is: " << result << endl;
+    return 0;
+}
+
+// Sample Input/Output:
+// Enter degree of polynomial: 3
+// Enter coefficients from highest to lowest degree:
+// a[3] = 1
+// a[2] = -4
+// a[1] = 1
+// a[0] = 6
+// Enter value of x: 2
+
+// Polynomial value at x = 2 is: 0
+
+// 2. Banker's Rounding Rule (Lec-2, Page 2)
+
+
+double bankersRound(double number, int n) {
+    if (number == 0) return 0.0;
+    int exp = (int)floor(log10(fabs(number)));
+    int shift = n - 1 - exp;
+    double factor = pow(10, shift);
+    double shifted = number * factor;
+    double floorVal = floor(shifted);
+    double frac = shifted - floorVal;
+    double rounded;
+    if (frac < 0.5) {
+        rounded = floorVal;
+    } else if (frac > 0.5) {
+        rounded = floorVal + 1;
+    } else {
+        if (fmod(floorVal, 2.0) == 0)
+            rounded = floorVal;
+        else
+            rounded = floorVal + 1;
+    }
+    return rounded / factor;
+}
+int main() {
+    double number;
+    int n;
+    cout << "Enter a number: ";
+    cin >> number;
+    cout << "Enter number of significant digits: ";
+    cin >> n;
+    cout << fixed << setprecision(10);
+    cout << "Rounded value: " << bankersRound(number, n) << endl;
+    return 0;
+}
+
+
+// Sample Input/Output:
+// Enter a number: 3.14159
+// Enter number of significant digits: 4
+// Rounded value: 3.1420000000
+
+
+// 3. Bisection Method (Lec-3, Page 5)
+double f(double x) {
+    return x*x*x - x - 1;
+}
+int main() {
+    double x1, x2, E;
+    cout << "Enter lower guess x1: "; cin >> x1;
+    cout << "Enter upper guess x2: "; cin >> x2;
+    cout << "Enter tolerance E: "; cin >> E;
+    double f1 = f(x1), f2 = f(x2);
+    if (f1 * f2 > 0) {
+        cout << "Initial guesses do not bracket a root." << endl;
+        return 1;
+    }
+    int iter = 0;
+    double x0 = x1;
+    cout << "\nIter\tx1\t\tx2\t\tx0\t\tf(x0)\n";
+
+    while (fabs(x2 - x1) >= E) {
+        x0 = (x1 + x2) / 2;
+        double f0 = f(x0);
+        cout << iter + 1 << "\t" << x1 << "\t" << x2 << "\t"
+             << x0 << "\t" << f0 << endl;
+        if (f1 * f0 < 0) {
+            x2 = x0;
+            f2 = f0;
+        } else {
+            x1 = x0;
+            f1 = f0;
+        }
+        iter++;
+    }
+    cout << "\nRoot ≈ " << (x1 + x2) / 2 << endl;
+    cout << "Iterations = " << iter << endl;
+    return 0;
+}
+
+// Sample Input/Output:
+// Enter lower guess x1: 1
+// Enter upper guess x2: 2
+// Enter tolerance E: 0.001
+
+// Iter    x1          x2          x0          f(x0)
+// 1       1           2           1.5         0.875
+// 2       1           1.5         1.25        -0.296875
+// 3       1.25        1.5         1.375       0.224609
+// Root ≈ 1.32422
+// Iterations = 10
+
+
+
+
+
+// 4. Newton-Raphson Method (Lec-3, Page 7)
+double f(double x)  { return x*x - 3*x + 2; }
+double df(double x) { return 2*x - 3; }
+int main() {
+    double x0, E;
+    int maxIter;
+    cout << "Enter initial guess x0: ";
+    cin >> x0;
+    cout << "Enter tolerance E: ";
+    cin >> E;
+    cout << "Enter maximum iterations: ";
+    cin >> maxIter;
+    cout << "\nIter\tx\t\tf(x)\n";
+    double x = x0;
+
+    for (int i = 1; i <= maxIter; i++) {
+        double fx = f(x);
+        double dfx = df(x);
+        if (dfx == 0) {
+            cout << "Derivative is zero. Method fails." << endl;
+            return 1;
+        }
+
+        double x_new = x - fx / dfx;
+        cout << i << "\t" << x_new << "\t" << f(x_new) << endl;
+        if (fabs(x_new - x) < E) {
+            x = x_new;
+            cout << "\nRoot ≈ " << x << endl;
+            cout << "Iterations = " << i << endl;
+            return 0;
+        }
+        x = x_new;
+    }
+    cout << "\nDid not converge within " << maxIter << " iterations." << endl;
+    cout << "Last estimate: " << x << endl;
+}
+
+// Sample Input/Output:
+// Enter initial guess x0: 0
+// Enter tolerance E: 0.0001
+// Enter maximum iterations: 50
+
+// Iter    x               f(x)
+// 1       0.6667          0.4444
+// 2       0.9333          0.0711
+// 3       0.9959          0.0041
+// 4       0.9999          0.0001
+// 5       1.0000          0.0000
+
+// Root ≈ 1
+// Iterations = 5
+
+
+
+
+// 5. Newton Forward Interpolation (Lec-4, Page 7)
+
+int main() {
+    int n;
+    cout << "Enter number of data points: ";
+    cin >> n;
+    vector<double> x(n), y(n);
+    cout << "Enter x values (equally spaced):\n";
+    for (int i = 0; i < n; i++) cin >> x[i];
+    cout << "Enter corresponding y values:\n";
+    for (int i = 0; i < n; i++) cin >> y[i];
+    double xp;
+    cout << "Enter x value to interpolate: ";
+    cin >> xp;
+    // Build forward difference table
+    vector<vector<double>> table(n, vector<double>(n, 0.0));
+    for (int i = 0; i < n; i++) table[i][0] = y[i];
+    for (int j = 1; j < n; j++)
+        for (int i = 0; i < n - j; i++)
+            table[i][j] = table[i+1][j-1] - table[i][j-1];
+    cout << "\nForward Difference Table:\n";
+    cout << setw(8) << "x" << setw(10) << "y";
+
+    for (int j = 1; j < n; j++) cout << setw(10) << ("Δ" + to_string(j) + "y");
+    cout << endl;
+    for (int i = 0; i < n; i++) {
+        cout << setw(8) << x[i] << setw(10) << y[i];
+        for (int j = 1; j < n - i; j++)
+            cout << setw(10) << table[i][j];
+        cout << endl;
+    }
+    double h = x[1] - x[0];
+    double u = (xp - x[0]) / h;
+    double result = table[0][0];
+    double uTerm = 1.0, fact = 1.0;
+    for (int i = 1; i < n; i++) {
+        uTerm *= (u - (i - 1));
+        fact  *= i;
+        result += uTerm * table[0][i] / fact;
+    }
+
+    cout << "\nInterpolated value at x = " << xp << " is: " << result << endl;
+    return 0;
+}
+
+// Sample Input/Output:
+// Enter number of data points: 5
+// Enter x values (equally spaced):
+// 0 1 2 3 4
+// Enter corresponding y values:
+// 1 3 9 31 81
+// Enter x value to interpolate: 2.5
+
+// Forward Difference Table:
+//        x         y        Δ1y        Δ2y        Δ3y        Δ4y
+//        0         1         2         4        16         0
+//        1         3         6        20        16
+//        2         9        26        36
+//        3        31        50
+//        4        81
+
+// Interpolated value at x = 2.5 is: 16.5625
+
+
+
+
+// 6. Newton Divided Difference Interpolation (Lec-4, Pages 13–14)
+int main() {
+    int n;
+    cout << "Enter number of data points: ";
+    cin >> n;
+    vector<double> x(n), y(n);
+    cout << "Enter x values (any spacing):\n";
+    for (int i = 0; i < n; i++) cin >> x[i];
+    cout << "Enter corresponding y values:\n";
+    for (int i = 0; i < n; i++) cin >> y[i];
+    double xv;
+    cout << "Enter x value to interpolate: ";
+    cin >> xv;
+    // Divided difference table
+    vector<vector<double>> table(n, vector<double>(n, 0.0));
+    for (int i = 0; i < n; i++) table[i][0] = y[i];
+    for (int j = 1; j < n; j++)
+        for (int i = 0; i < n - j; i++)
+            table[i][j] = (table[i+1][j-1] - table[i][j-1]) / (x[i+j] - x[i]);
+    // Print table
+    cout << "\nDivided Difference Table:\n";
+    cout << setw(8) << "x" << setw(10) << "f[x]";
+    for (int j = 1; j < n; j++) cout << setw(12) << ("f[.." + to_string(j) + "]");
+    cout << endl;
+    for (int i = 0; i < n; i++) {
+        cout << setw(8) << x[i] << setw(10) << y[i];
+        for (int j = 1; j < n - i; j++)
+            cout << setw(12) << table[i][j];
+        cout << endl;
+    }
+    double result = table[0][0];
+    double term = 1.0;
+    for (int i = 1; i < n; i++) {
+        term *= (xv - x[i-1]);
+        result += term * table[0][i];
+    }
+    cout << "\nInterpolated value at x = " << xv << " is: " << result << endl;
+    return 0;
+}
+
+// Sample Input/Output:
+// Enter number of data points: 4
+// Enter x values (any spacing):
+// 1 2 4 7
+// Enter corresponding y values:
+// 3 5 11 19
+// Enter x value to interpolate: 3
+
+// Divided Difference Table:
+//        x       f[x]      f[..1]      f[..2]      f[..3]
+//        1          3           2           1           0
+//        2          5           3           1
+//        4         11           2.66667
+//        7         19
+
+// Interpolated value at x = 3 is: 7
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //1. Horner's Rule (সহজ)
 int main() {
     int n;
